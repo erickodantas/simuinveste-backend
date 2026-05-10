@@ -1,6 +1,16 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 function authMiddleware(req, res, next) {
+  if (process.env.NODE_ENV !== 'production' && process.env.DEV_FAKE_USER_ID) {
+    const fakeId = process.env.DEV_FAKE_USER_ID;
+    if (!mongoose.Types.ObjectId.isValid(fakeId)) {
+      return res.status(500).json({ erro: 'DEV_FAKE_USER_ID inválido (precisa ser um ObjectId).' });
+    }
+    req.usuarioId = fakeId;
+    return next();
+  }
+
   const headerAuth = req.headers.authorization;
 
   if (!headerAuth) {

@@ -1,4 +1,5 @@
 const TIPOS_VALIDOS = ['TEMPO_DEFINIDO', 'APORTE_DEFINIDO', 'ACUMULO_LIVRE'];
+const STATUS_VALIDOS = ['EM_ANDAMENTO', 'CONCLUIDA'];
 
 class CriarMetaDTO {
   constructor(body) {
@@ -63,7 +64,69 @@ class MetaResponseDTO {
   }
 }
 
+class AtualizarMetaDTO {
+  constructor(body) {
+    this.alteracoes = {};
+    this.erros = [];
+
+    if (body.nome !== undefined) {
+      const nome = typeof body.nome === 'string' ? body.nome.trim() : '';
+      if (!nome) {
+        this.erros.push('O campo nome não pode ser vazio.');
+      } else {
+        this.alteracoes.nome = nome;
+      }
+    }
+
+    if (body.tipo !== undefined) {
+      if (!TIPOS_VALIDOS.includes(body.tipo)) {
+        this.erros.push(`O campo tipo deve ser um de: ${TIPOS_VALIDOS.join(', ')}.`);
+      } else {
+        this.alteracoes.tipo = body.tipo;
+      }
+    }
+
+    if (body.status !== undefined) {
+      if (!STATUS_VALIDOS.includes(body.status)) {
+        this.erros.push(`O campo status deve ser um de: ${STATUS_VALIDOS.join(', ')}.`);
+      } else {
+        this.alteracoes.status = body.status;
+      }
+    }
+
+    const numericos = [
+      { campo: 'valorObjetivo', min: 0, exclusivo: true },
+      { campo: 'valorInicial', min: 0, exclusivo: false },
+      { campo: 'taxaJurosAnual', min: 0, exclusivo: false },
+      { campo: 'prazoMeses', min: 0, exclusivo: true },
+      { campo: 'aporteMensal', min: 0, exclusivo: false },
+    ];
+
+    for (const { campo, min, exclusivo } of numericos) {
+      if (body[campo] === undefined) continue;
+      const valor = Number(body[campo]);
+      const minOk = exclusivo ? valor > min : valor >= min;
+      if (!Number.isFinite(valor) || !minOk) {
+        const sufixo = exclusivo ? `maior que ${min}` : `maior ou igual a ${min}`;
+        this.erros.push(`O campo ${campo} deve ser um número ${sufixo}.`);
+      } else {
+        this.alteracoes[campo] = valor;
+      }
+    }
+  }
+
+  validar() {
+    return {
+      valido: this.erros.length === 0 && Object.keys(this.alteracoes).length > 0,
+      erros: this.erros.length > 0
+        ? this.erros
+        : ['Informe ao menos um campo para atualizar.'],
+    };
+  }
+}
+
 module.exports = {
   CriarMetaDTO,
+  AtualizarMetaDTO,
   MetaResponseDTO,
 };

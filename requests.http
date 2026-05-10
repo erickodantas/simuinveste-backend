@@ -1,0 +1,77 @@
+### Variáveis
+@host = http://localhost:3333
+
+###
+# 1) Healthcheck
+GET {{host}}/
+
+###
+# 1a) Taxas (público — sem Authorization)
+# Primeira chamada bate na BCB e persiste 3 docs em `taxas` no Atlas.
+# Próximas chamadas dentro do TAXAS_TTL_MIN (default 12h) leem do banco.
+GET {{host}}/api/taxas
+
+###
+# 2) Criar usuário (use UMA vez para obter o _id que vai no DEV_FAKE_USER_ID)
+POST {{host}}/api/auth/registrar
+Content-Type: application/json
+
+{
+  "nome": "Dev User",
+  "email": "dev@simuinveste.local",
+  "senha": "123456"
+}
+
+###
+# 3) (Opcional) Login — útil se um dia quiser desligar o bypass e testar com token real
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dev@simuinveste.local",
+  "senha": "123456"
+}
+
+###
+# 4) Criar meta
+# Com DEV_FAKE_USER_ID setado no .env, NÃO precisa do header Authorization.
+POST {{host}}/api/metas
+Content-Type: application/json
+
+{
+  "nome": "Comprar carro",
+  "tipo": "TEMPO_DEFINIDO",
+  "valorObjetivo": 50000,
+  "valorInicial": 5000,
+  "taxaJurosAnual": 10,
+  "prazoMeses": 36,
+  "aporteMensal": 800
+}
+
+###
+# 5) Listar metas do usuário
+GET {{host}}/api/metas
+
+###
+# 6) Atualizar meta (parcial — só envie os campos que quer mudar)
+# Substitua :id pelo id retornado em criar/listar
+PUT {{host}}/api/metas/COLE_O_ID_AQUI
+Content-Type: application/json
+
+{
+  "aporteMensal": 1200,
+  "prazoMeses": 24
+}
+
+###
+# 7) Concluir meta (toggle de status)
+PUT {{host}}/api/metas/COLE_O_ID_AQUI
+Content-Type: application/json
+
+{
+  "status": "CONCLUIDA"
+}
+
+###
+# 8) Excluir meta
+DELETE {{host}}/api/metas/COLE_O_ID_AQUI
