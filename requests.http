@@ -12,6 +12,11 @@ GET {{host}}/
 GET {{host}}/api/taxas
 
 ###
+# 1b) Investimentos (público — sem Authorization)
+# Catálogo com 5 produtos e taxaJurosAnual já calculada (consome /api/taxas internamente).
+GET {{host}}/api/investimentos
+
+###
 # 2) Criar usuário (use UMA vez para obter o _id que vai no DEV_FAKE_USER_ID)
 POST {{host}}/api/auth/registrar
 Content-Type: application/json
