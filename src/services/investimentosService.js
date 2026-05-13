@@ -38,7 +38,7 @@ function montarCatalogo({ cdi, selic, tr }) {
       nome: 'LCI 90% CDI',
       descricao: 'Focado no setor imobiliário e isento de IR.',
       taxaJurosAnual: cdi * 0.9,
-      nivelNecessario: 2,
+      nivelNecessario: 3,
       risco: 'Baixo',
       isIsentoIR: true,
     },
