@@ -62,7 +62,7 @@ class UsuarioController {
         return res.status(400).json({ erros });
       }
 
-      const usuario = await Usuario.findOne({ email: dto.email });
+      const usuario = await Usuario.findOne({ email: dto.email }).select('+senha');
 
       if (!usuario) {
         await bcrypt.compare(dto.senha, HASH_DUMMY);
